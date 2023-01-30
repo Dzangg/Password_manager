@@ -1,9 +1,6 @@
 import sys
-
-import bcrypt
-from PyQt5 import QtSvg
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QCursor, QIcon
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import *
 
 import handleUser
@@ -11,8 +8,6 @@ import handleUser
 WIN_SIZE = 500
 with open("resources/css/styles.css", 'r') as f:
     css = f.read()
-
-error = 0
 
 
 def popout():
@@ -24,7 +19,7 @@ class Window(QMainWindow):
         super().__init__()
         # Initial
         self.setWindowTitle("Password Manager")
-        self.setFixedSize(WIN_SIZE, WIN_SIZE)
+        self.setMinimumSize(WIN_SIZE, WIN_SIZE)
         self.setStyleSheet(" background-color: #fff; ")
 
         # central widget
@@ -36,13 +31,12 @@ class Window(QMainWindow):
         outerLayout = QVBoxLayout()
         topLayout = QVBoxLayout()
         middleLayout = QVBoxLayout()
-        bottomLayout = QVBoxLayout()
 
         # Layouts alignment and spacing
+        topLayout.setAlignment(Qt.AlignCenter)
         outerLayout.setAlignment(Qt.AlignCenter)
         middleLayout.setAlignment(Qt.AlignCenter)
         middleLayout.setSpacing(30)
-        bottomLayout.setAlignment(Qt.AlignCenter)
 
         # creating widgets
         self._createLabel()
@@ -56,29 +50,39 @@ class Window(QMainWindow):
         # adding layouts to outerlayout and setting central Layout
         outerLayout.addLayout(topLayout)
         outerLayout.addLayout(middleLayout)
-        outerLayout.addLayout(bottomLayout)
         self.main_window.setLayout(outerLayout)
         self.centralwidget.addWidget(self.main_window)
+
+    def connect_user(self, user, password):
+        panel = userPanelWidget(user, password)
+        self.centralwidget.addWidget(panel)
+        self.centralwidget.setCurrentWidget(panel)
 
     def signed(self):
         popout()
         self.centralwidget.setCurrentWidget(self.main_window)
+        self.centralwidget.removeWidget(self.signup_widget)
 
     # switch between widgets
-    def back(self):
+    def back_sign(self):
         self.centralwidget.setCurrentWidget(self.main_window)
+        self.centralwidget.removeWidget(self.signup_widget)
+
+    def back_login(self):
+        self.centralwidget.setCurrentWidget(self.main_window)
+        self.centralwidget.removeWidget(self.login_widget)
 
     def signupView(self):
-        signup_widget = signUpWidget(self)
-        signup_widget.cancelBtn.clicked.connect(self.back)
-        self.centralwidget.addWidget(signup_widget)
-        self.centralwidget.setCurrentWidget(signup_widget)
+        self.signup_widget = signUpWidget(self)
+        self.signup_widget.cancelBtn.clicked.connect(self.back_sign)
+        self.centralwidget.addWidget(self.signup_widget)
+        self.centralwidget.setCurrentWidget(self.signup_widget)
 
     def loginView(self):
-        login_widget = logInWidget(self)
-        login_widget.cancelBtn.clicked.connect(self.back)
-        self.centralwidget.addWidget(login_widget)
-        self.centralwidget.setCurrentWidget(login_widget)
+        self.login_widget = logInWidget(self)
+        self.login_widget.cancelBtn.clicked.connect(self.back_login)
+        self.centralwidget.addWidget(self.login_widget)
+        self.centralwidget.setCurrentWidget(self.login_widget)
 
     def _createLabel(self):
         self.label = QLabel("Password Manager")
@@ -105,8 +109,8 @@ class Window(QMainWindow):
 class signUpWidget(QWidget):
     def __init__(self, parent=None):
         super(signUpWidget, self).__init__(parent)
-        self.setFixedSize(350, 350)
         self.parent = parent
+        self.setMinimumSize(WIN_SIZE, WIN_SIZE)
         # create layouts
         outerLayout = QVBoxLayout()
         topLayout = QVBoxLayout()
@@ -114,15 +118,15 @@ class signUpWidget(QWidget):
         bottomLayout = QHBoxLayout()
 
         # layouts alignment
-        outerLayout.setAlignment(Qt.AlignCenter)
+        topLayout.setAlignment(Qt.AlignCenter)
         formLayout.setAlignment(Qt.AlignCenter)
-        bottomLayout.setAlignment(Qt.AlignRight)
+        bottomLayout.setAlignment(Qt.AlignCenter)
+        outerLayout.setAlignment(Qt.AlignCenter)
 
         # create Form
         self._signupForm()
 
         # add widgets to layouts
-
         topLayout.addWidget(self.infoLabel)
         formLayout.addWidget(self.labelName)
         formLayout.addWidget(self.name)
@@ -135,7 +139,7 @@ class signUpWidget(QWidget):
         # add layouts to outer layout
         outerLayout.addLayout(topLayout)
         outerLayout.addLayout(formLayout)
-        outerLayout.addSpacing(60)
+        # outerLayout.addSpacing(100)
         outerLayout.addLayout(bottomLayout)
         self.setLayout(outerLayout)
 
@@ -179,47 +183,51 @@ class signUpWidget(QWidget):
         self.errorLabel.setText("User {} already exists!".format(value))
 
     def invalidCredentials(self):
-        if self.name.text() == "" or self.password.text() == "":
-            self.errorLabel.setText("Invalid credentials")
-            return True
-        return False
+        self.errorLabel.setText("Invalid credentials")
 
-    def handleErrors(self, user):
-        if not self.invalidCredentials():
+    def isValid(self, user):
+        if self.name.text() == "" or self.password.text() == "":
+            self.invalidCredentials()
+            return False
+        else:
             if not handleUser.userExists(user):
                 handleUser.createUserFiles(user)
                 return True
             else:
                 self.errorUserExists(user)
                 return False
-        return False
+
+    def _initializeProfileCreation(self, user):
+        password = self.password.text()
+        try:
+            key_one = handleUser.create_firstKey()
+            # print(key_one)
+            key_two = handleUser.create_secondKey(password)
+            # print(key_two)
+            encrypted_first_key = handleUser.encrypt_firstKey(key_one, key_two)
+            # print(encrypted_first_key)
+            salt = handleUser.generateRandomSalt()
+            # print(salt)
+            hashed_password = handleUser.hash_password(password.encode(), salt)
+            # print(hashed_password)
+            handleUser.write_firstKey(user, encrypted_first_key)
+            handleUser.write_info(user, hashed_password, salt)
+            self.parent.signed()
+        except:
+            handleUser.del_user(user)
+            print("Signup error occured")
 
     def _submitForm(self):
         user = self.name.text()
-        if self.handleErrors(user):
-            password = self.password.text()
-            try:
-                key_one = handleUser.create_firstKey()
-                # print(key_one)
-                key_two = handleUser.create_secondKey(password)
-                # print(key_two)
-                encrypted_first_key = handleUser.encrypt_firstKey(key_one, key_two)
-                # print(encrypted_first_key)
-                salt = handleUser.generateRandomSalt()
-                # print(salt)
-                hashed_password = handleUser.hash_password(password.encode(), salt)
-                # print(hashed_password)
-                handleUser.write_firstKey(user, encrypted_first_key)
-                handleUser.write_info(user, hashed_password, salt)
-                self.parent.signed()
-            except error:
-                return error
+        if self.isValid(user):
+            self._initializeProfileCreation(user)
 
 
 class logInWidget(QWidget):
     def __init__(self, parent=None):
         super(logInWidget, self).__init__(parent)
-        self.setFixedSize(350, 350)
+        self.setMinimumSize(WIN_SIZE, WIN_SIZE)
+        self.pr = parent
 
         # create layouts
         outerLayout = QVBoxLayout()
@@ -228,9 +236,10 @@ class logInWidget(QWidget):
         bottomLayout = QHBoxLayout()
 
         # layout alignment
-        outerLayout.setAlignment(Qt.AlignCenter)
+        topLayout.setAlignment(Qt.AlignCenter)
         formLayout.setAlignment(Qt.AlignCenter)
-        bottomLayout.setAlignment(Qt.AlignRight)
+        bottomLayout.setAlignment(Qt.AlignCenter)
+        outerLayout.setAlignment(Qt.AlignCenter)
 
         # create Form
         self._logInForm()
@@ -248,7 +257,7 @@ class logInWidget(QWidget):
         # add layouts to outer layout
         outerLayout.addLayout(topLayout)
         outerLayout.addLayout(formLayout)
-        outerLayout.addSpacing(60)
+        # outerLayout.addSpacing(100)
         outerLayout.addLayout(bottomLayout)
         self.setLayout(outerLayout)
 
@@ -291,34 +300,154 @@ class logInWidget(QWidget):
         if self.errorLabel.text() != "":
             self.errorLabel.setText("")
 
-    def invalidCredentials(self):
+    def isValid(self):
         if self.name.text() == "" or self.password.text() == "":
-            self.errorLabel.setText("Invalid credentials")
-            return True
-        return False
+            return False
+        return True
+
+    def invalidCredentials(self):
+        self.errorLabel.setText("Invalid credentials")
+
+    def _initializeLogin(self):
+        pass
 
     def _submitForm(self):
         user = self.name.text()
-        if not self.invalidCredentials():
+        if self.isValid():
             if handleUser.userExists(user):
                 password = self.password.text()
                 if handleUser.compare_passwords(user, password):
-                    print("zalogowano")
+                    self.pr.connect_user(user, password)
                 else:
-                    print("zle haslo")
+                    self.invalidCredentials()
+            else:
+                self.invalidCredentials()
+        else:
+            self.invalidCredentials()
 
 
 class popoutWidget(QDialog):
     def __init__(self):
         super(popoutWidget, self).__init__()
         self.setModal(True)
-        # self.setFixedSize(180, 100)
+        self.setFixedSize(200, 100)
         layout = QVBoxLayout()
         self.label = QLabel("Successfully created profile.")
         self.label.setObjectName("signedPopoutLabel")
         self.label.setStyleSheet(css)
         layout.addWidget(self.label)
         self.setLayout(layout)
+
+
+class userPanelWidget(QWidget):
+    def __init__(self, user, password):
+        super(userPanelWidget, self).__init__()
+        self.emptyData = False
+
+        self.outerlayout = QVBoxLayout()
+        self.headerLayout = QHBoxLayout()
+        self.labelLayout = QHBoxLayout()
+        self.inputLayout = QHBoxLayout()
+        self.toolsLayout = QHBoxLayout()
+        self.tableLayout = QVBoxLayout()
+
+        self.outerlayout.setAlignment(Qt.AlignCenter)
+        self.headerLayout.setAlignment(Qt.AlignLeft)
+
+        self.userLabel = QLabel("User: ")
+        self.userLabel.setObjectName("userLabel")
+        self.userLabel.setStyleSheet(css)
+        self.userNameLabel = QLabel("")
+        self.userNameLabel.setObjectName("userNameLabel")
+        self.userNameLabel.setStyleSheet(css)
+
+        self._doubleCheck(user, password)
+        self._createTable()
+        self._createInputData()
+        self._createTools()
+
+        self.headerLayout.addWidget(self.userLabel)
+        self.headerLayout.addWidget(self.userNameLabel)
+
+        self.outerlayout.addLayout(self.headerLayout)
+        self.outerlayout.addLayout(self.labelLayout)
+        self.outerlayout.addLayout(self.inputLayout)
+        self.outerlayout.addLayout(self.toolsLayout)
+        self.tableLayout.addWidget(self.tableWidget)
+        self.outerlayout.addLayout(self.tableLayout)
+        self.setLayout(self.outerlayout)
+
+    def _doubleCheck(self, user, password):
+        isValid = handleUser.compare_passwords(user, password)
+        if isValid:
+            self.user = user
+            self.user_password = password
+            self.userNameLabel.setText(user)
+        else:
+            self.close()
+
+    def _createTools(self):
+        self.unlockEditBtn = QPushButton("Edit")
+        self.unlockEditBtn.clicked.connect(self._switchTableLock)
+        self.applyBtn = QPushButton("Apply")
+        self.cancelBtn = QPushButton("Cancel")
+
+        self.randomPasswordBtn = QPushButton("Generate password")
+        self.randomPasswordBtn.clicked.connect(self._generatePassword)
+        self.generatedPassword = QLineEdit()
+        self.generatedPassword.setReadOnly(True)
+
+        self.toolsLayout.addWidget(self.unlockEditBtn)
+        self.toolsLayout.addWidget(self.applyBtn)
+        self.toolsLayout.addWidget(self.cancelBtn)
+        self.toolsLayout.addWidget(self.randomPasswordBtn)
+
+    def _createInputData(self):
+        self.inputNameLabel = QLabel("Name:")
+        self.inputNameLabel.setFixedSize(90, 20)
+        self.inputNameLabel.setObjectName("in")
+        self.inputNameLabel.setStyleSheet(css)
+        self.inputLoginLabel = QLabel("Login:")
+        self.inputPasswordLabel = QLabel("Password:")
+        self.inputUrlLabel = QLabel("Url:")
+        self.inputNoteLabel = QLabel("Note:")
+        self.addRowBtn = QPushButton("Add")
+
+        self.inputName = QLineEdit()
+        self.inputLogin = QLineEdit()
+        self.inputPassword = QLineEdit()
+        self.inputUrl = QLineEdit()
+        self.inputNote = QLineEdit()
+
+        self.labelLayout.addWidget(self.inputNameLabel)
+        self.labelLayout.addWidget(self.inputLoginLabel)
+        self.labelLayout.addWidget(self.inputPasswordLabel)
+        self.labelLayout.addWidget(self.inputUrlLabel)
+        self.labelLayout.addWidget(self.inputNoteLabel)
+        self.labelLayout.addWidget(self.addRowBtn)
+
+        self.inputLayout.addWidget(self.inputName)
+        self.inputLayout.addWidget(self.inputLogin)
+        self.inputLayout.addWidget(self.inputPassword)
+        self.inputLayout.addWidget(self.inputUrl)
+        self.inputLayout.addWidget(self.inputNote)
+
+    def _getUserData(self):
+        data = handleUser.read_data(self.user, self.user_password)
+        if data is False:
+            self.emptyData = True
+            return False
+
+    def _createTable(self):
+        self.tableWidget = QTableWidget()
+        self._getUserData()
+
+    def _generatePassword(self):
+        random_password = handleUser.generate_random_password()
+        self.generatedPassword.setText(random_password)
+
+    def _switchTableLock(self):
+        pass
 
 
 # user_info = []

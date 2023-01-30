@@ -1,5 +1,3 @@
-import secrets
-
 import bcrypt
 
 import base64
@@ -11,6 +9,11 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
 import secrets
 import json
+
+import random
+import string
+
+import shutil
 
 current_dir = os.getcwd()
 usersDir = current_dir + "/users/"
@@ -93,7 +96,17 @@ def compare_passwords(user, given_password):
     return False
 
 
-#
+def generate_random_password():
+    characterList = ""
+    characterList += string.ascii_letters
+    characterList += string.digits
+    characterList += string.punctuation
+    password = ""
+    for i in range(20):
+        randomChar = random.choice(characterList)
+        password += randomChar
+
+    return password
 
 
 # ------------------- File Section -------------------
@@ -152,18 +165,19 @@ def read_firstKey(user, password):
 
 
 # reads encrypted and return decrypted
-def read_data(user, password, target):
-    local_dir = ""
-    if target == "key":
-        local_dir = usersDir + user + "/file_key.key"
-    if target == "data":
-        local_dir = usersDir + user + "/user_data.json"
+def read_data(user, password):
+    local_dir = usersDir + user + "/user_data.json"
+    if os.path.getsize(local_dir) == 0:
+        return False
+    fileObject = open("test.json", "r")
 
-    with open(local_dir, "r") as f:
-        jsonContent = f.read()
+    jsonContent = fileObject.read()
 
+    print(jsonContent)
     data = json.loads(jsonContent)
-    return decrypt_data(password, data)
+    decrypted = decrypt_data(password, data)
+    print("decrypted: ", decrypted)
+    return decrypted
 
 
 def write_data(user, password, target, data):
@@ -204,3 +218,8 @@ def read_salt(user):
         json_data = f.read()
     data = json.loads(json_data)
     return data["salt"]
+
+
+def del_user(user):
+    local_dir = usersDir + user
+    shutil.rmtree(local_dir)
