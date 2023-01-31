@@ -36,7 +36,7 @@ def hash_password(password, salt):
 # use to encrypt user data
 def create_firstKey():
     # randon num key
-    key = secrets.token_hex(16)
+    key = base64.urlsafe_b64encode(os.urandom(32))
     return key
 
 
@@ -57,30 +57,32 @@ def create_secondKey(passwd):
 
 def encrypt_firstKey(first_key, second_key):
     f = Fernet(second_key)
-    encrypted_first_key = f.encrypt(first_key.encode())
+    encrypted_first_key = f.encrypt(first_key)
     return encrypted_first_key
 
 
-def decrypt_firstKey(encrypted_firstkey, password):
-    second_key = create_secondKey(password)
+def decrypt_firstKey(encrypted_firstkey, second_key):
     f = Fernet(second_key)
     decrypted_firstKey = f.decrypt(encrypted_firstkey)
     return decrypted_firstKey
 
 
-def decrypt_data(password, data):
+def decrypt_data(password, data, user):
     second_key = create_secondKey(password)
-    f = Fernet(second_key)
+    decrypted_first_key = read_firstKey(user, second_key)
+    f = Fernet(decrypted_first_key)
     decrypted_data = f.decrypt(data)
     normal_format = json.loads(decrypted_data)
     return normal_format
 
 
-def encrypt_data(password, data):
-    second_key = create_secondKey(password)
-    f = Fernet(second_key)
+def encrypt_data(password, data, user):
     json_data = json.dumps(data, indent=4)
     json_data = json_data.encode()
+    print(json_data)
+    second_key = create_secondKey(password)
+    decrypted_first_key = read_firstKey(user, second_key)
+    f = Fernet(decrypted_first_key)
     encrypted_data = f.encrypt(json_data)
     return encrypted_data
 
@@ -147,8 +149,7 @@ def initializeDirectory():
 
 # saves generated firstKey to .key file
 def write_firstKey(user, encrypted_first_key):
-    data = []
-    data.append({"Key": encrypted_first_key.decode()})
+    data = {"Key": encrypted_first_key.decode()}
     json_data = json.dumps(data, indent=4)
 
     with open(usersDir + user + "/file_key.key", "w") as f:
@@ -156,11 +157,13 @@ def write_firstKey(user, encrypted_first_key):
 
 
 # reads encrypted and return decrypted
-def read_firstKey(user, password):
+def read_firstKey(user, second_key):
     fileObject = open(usersDir + user + "/file_key.key", "r")
     jsonContent = fileObject.read()
     encrypted_firstkey = json.loads(jsonContent)
-    decrypted_firstkey = decrypt_firstKey(encrypted_firstkey, password)
+    encrypted_firstkey = encrypted_firstkey["Key"]
+
+    decrypted_firstkey = decrypt_firstKey(encrypted_firstkey, second_key)
     return decrypted_firstkey
 
 
@@ -169,28 +172,41 @@ def read_data(user, password):
     local_dir = usersDir + user + "/user_data.json"
     if os.path.getsize(local_dir) == 0:
         return False
-    fileObject = open("test.json", "r")
 
-    jsonContent = fileObject.read()
+    with open(local_dir, "r") as f:
+        data = f.read()
 
-    print(jsonContent)
-    data = json.loads(jsonContent)
-    decrypted = decrypt_data(password, data)
-    print("decrypted: ", decrypted)
+    decrypted = decrypt_data(password, data, user)
     return decrypted
 
 
-def write_data(user, password, target, data):
-    local_dir = ""
-    if target == "key":
-        local_dir = usersDir + user + "/file_key.key"
-    if target == "data":
-        local_dir = usersDir + user + "/user_data.json"
+def append_data(user, password, row):
+    local_dir = usersDir + user + "/user_data.json"
+    if os.path.getsize(local_dir) != 0:
+        temp = read_data(user, password)
+        temp.append(row)
+        encrypted = encrypt_data(password, temp, user).decode()
+        with open(local_dir, "w") as f:
+            f.write(encrypted)
+    else:
+        temp = []
+        temp.append(row)
+        encrypted = encrypt_data(password, temp, user).decode()
+        with open(local_dir, 'w') as f:
+            f.write(encrypted)
 
-    encrypted_data = encrypt_data(password, data)
 
+def write_data(user, password, data):
+    local_dir = usersDir + user + "/user_data.json"
+    encrypted = encrypt_data(password, data, user).decode()
     with open(local_dir, 'w') as f:
-        f.write(encrypted_data.decode())
+        f.write(encrypted)
+
+
+def delete_data(user):
+    local_dir = usersDir + user + "/user_data.json"
+    with open(local_dir, "w") as f:
+        pass
 
 
 def write_info(user, hashed, generatedSalt):

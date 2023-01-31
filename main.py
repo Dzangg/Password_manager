@@ -1,8 +1,8 @@
 import sys
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QCursor
+from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
+from PyQt5 import QtWidgets
 import handleUser
 
 WIN_SIZE = 500
@@ -24,9 +24,10 @@ class Window(QMainWindow):
 
         # central widget
         self.centralwidget = QStackedWidget()
+
         self.setCentralWidget(self.centralwidget)
         self.main_window = QWidget(self)
-
+        self.main_window.setWindowFlags(Qt.FramelessWindowHint)
         # Creating Layouts
         outerLayout = QVBoxLayout()
         topLayout = QVBoxLayout()
@@ -57,6 +58,7 @@ class Window(QMainWindow):
         panel = userPanelWidget(user, password)
         self.centralwidget.addWidget(panel)
         self.centralwidget.setCurrentWidget(panel)
+        self.setMinimumSize(0, 0)
 
     def signed(self):
         popout()
@@ -342,17 +344,26 @@ class popoutWidget(QDialog):
 class userPanelWidget(QWidget):
     def __init__(self, user, password):
         super(userPanelWidget, self).__init__()
-        self.emptyData = False
-
         self.outerlayout = QVBoxLayout()
         self.headerLayout = QHBoxLayout()
         self.labelLayout = QHBoxLayout()
         self.inputLayout = QHBoxLayout()
-        self.toolsLayout = QHBoxLayout()
+        self.btnLayout = QHBoxLayout()
         self.tableLayout = QVBoxLayout()
+        self.toolsLayout = QHBoxLayout()
+        self.deleteLayout = QGridLayout()
+
+        self.tableWidget = QTableWidget()
+        # self.tableWidget.setMaximumSize(560, 300)
 
         self.outerlayout.setAlignment(Qt.AlignCenter)
         self.headerLayout.setAlignment(Qt.AlignLeft)
+        self.labelLayout.setAlignment(Qt.AlignLeft)
+        self.inputLayout.setAlignment(Qt.AlignLeft)
+        self.btnLayout.setAlignment(Qt.AlignLeft)
+        self.tableLayout.setAlignment(Qt.AlignLeft)
+        self.toolsLayout.setAlignment(Qt.AlignLeft)
+        self.deleteLayout.setAlignment(Qt.AlignLeft)
 
         self.userLabel = QLabel("User: ")
         self.userLabel.setObjectName("userLabel")
@@ -362,7 +373,7 @@ class userPanelWidget(QWidget):
         self.userNameLabel.setStyleSheet(css)
 
         self._doubleCheck(user, password)
-        self._createTable()
+        self._showTable()
         self._createInputData()
         self._createTools()
 
@@ -372,9 +383,11 @@ class userPanelWidget(QWidget):
         self.outerlayout.addLayout(self.headerLayout)
         self.outerlayout.addLayout(self.labelLayout)
         self.outerlayout.addLayout(self.inputLayout)
-        self.outerlayout.addLayout(self.toolsLayout)
+        self.outerlayout.addLayout(self.btnLayout)
         self.tableLayout.addWidget(self.tableWidget)
         self.outerlayout.addLayout(self.tableLayout)
+        self.outerlayout.addLayout(self.toolsLayout)
+        self.outerlayout.addLayout(self.deleteLayout)
         self.setLayout(self.outerlayout)
 
     def _doubleCheck(self, user, password):
@@ -386,32 +399,20 @@ class userPanelWidget(QWidget):
         else:
             self.close()
 
-    def _createTools(self):
-        self.unlockEditBtn = QPushButton("Edit")
-        self.unlockEditBtn.clicked.connect(self._switchTableLock)
-        self.applyBtn = QPushButton("Apply")
-        self.cancelBtn = QPushButton("Cancel")
-
-        self.randomPasswordBtn = QPushButton("Generate password")
-        self.randomPasswordBtn.clicked.connect(self._generatePassword)
-        self.generatedPassword = QLineEdit()
-        self.generatedPassword.setReadOnly(True)
-
-        self.toolsLayout.addWidget(self.unlockEditBtn)
-        self.toolsLayout.addWidget(self.applyBtn)
-        self.toolsLayout.addWidget(self.cancelBtn)
-        self.toolsLayout.addWidget(self.randomPasswordBtn)
-
     def _createInputData(self):
         self.inputNameLabel = QLabel("Name:")
-        self.inputNameLabel.setFixedSize(90, 20)
-        self.inputNameLabel.setObjectName("in")
-        self.inputNameLabel.setStyleSheet(css)
         self.inputLoginLabel = QLabel("Login:")
         self.inputPasswordLabel = QLabel("Password:")
         self.inputUrlLabel = QLabel("Url:")
         self.inputNoteLabel = QLabel("Note:")
         self.addRowBtn = QPushButton("Add")
+
+        self.inputNameLabel.setFixedSize(130, 20)
+        self.inputLoginLabel.setFixedSize(130, 20)
+        self.inputPasswordLabel.setFixedSize(130, 20)
+        self.inputUrlLabel.setFixedSize(130, 20)
+        self.inputNoteLabel.setFixedSize(130, 20)
+        self.addRowBtn.setFixedSize(130, 20)
 
         self.inputName = QLineEdit()
         self.inputLogin = QLineEdit()
@@ -419,12 +420,20 @@ class userPanelWidget(QWidget):
         self.inputUrl = QLineEdit()
         self.inputNote = QLineEdit()
 
+        self.inputName.setFixedSize(130, 20)
+        self.inputLogin.setFixedSize(130, 20)
+        self.inputPassword.setFixedSize(130, 20)
+        self.inputUrl.setFixedSize(130, 20)
+        self.inputNote.setFixedSize(130, 20)
+
+        self.addRowBtn.clicked.connect(self._addNewData)
+
         self.labelLayout.addWidget(self.inputNameLabel)
         self.labelLayout.addWidget(self.inputLoginLabel)
         self.labelLayout.addWidget(self.inputPasswordLabel)
         self.labelLayout.addWidget(self.inputUrlLabel)
         self.labelLayout.addWidget(self.inputNoteLabel)
-        self.labelLayout.addWidget(self.addRowBtn)
+        self.btnLayout.addWidget(self.addRowBtn)
 
         self.inputLayout.addWidget(self.inputName)
         self.inputLayout.addWidget(self.inputLogin)
@@ -432,22 +441,145 @@ class userPanelWidget(QWidget):
         self.inputLayout.addWidget(self.inputUrl)
         self.inputLayout.addWidget(self.inputNote)
 
-    def _getUserData(self):
+    def _createTools(self):
+        self.unlockEditBtn = QPushButton("Edit")
+        self.unlockEditBtn.clicked.connect(self._switchTableEdit)
+        self.applyBtn = QPushButton("Apply")
+        self.cancelBtn = QPushButton("Cancel")
+        self.randomPasswordBtn = QPushButton("Generate password")
+        self.randomPasswordBtn.clicked.connect(self._generatePassword)
+        self.deleteBtn = QPushButton("Delete row:")
+        self.deleteBtn.clicked.connect(self._deleteRow)
+        self.deleteInput = QLineEdit()
+        self.deleteInput.setPlaceholderText("Row")
+
+        self.randomPasswordBtn.setFixedSize(130, 20)
+
+        self.unlockEditBtn.setFixedSize(130, 20)
+        self.applyBtn.setFixedSize(130, 20)
+        self.cancelBtn.setFixedSize(130, 20)
+        self.deleteBtn.setFixedSize(130, 20)
+        self.deleteInput.setFixedSize(130, 20)
+
+        self.applyBtn.setDisabled(True)
+        self.cancelBtn.setDisabled(True)
+
+        self.applyBtn.clicked.connect(self._applyAction)
+        self.cancelBtn.clicked.connect(self._cancelAction)
+
+        self.btnLayout.addWidget(self.randomPasswordBtn)
+
+        self.toolsLayout.addWidget(self.unlockEditBtn)
+        self.toolsLayout.addWidget(self.applyBtn)
+        self.toolsLayout.addWidget(self.cancelBtn)
+
+        self.deleteLayout.addWidget(self.deleteBtn, 0, 0)
+        self.deleteLayout.addWidget(self.deleteInput, 0, 1)
+
+    def _showTable(self):
+        # get data from file
         data = handleUser.read_data(self.user, self.user_password)
         if data is False:
-            self.emptyData = True
             return False
 
-    def _createTable(self):
-        self.tableWidget = QTableWidget()
-        self._getUserData()
+        # Row count
+        self.tableWidget.setRowCount(len(data))
+
+        # Column count
+        self.tableWidget.setColumnCount(len(data[0]))
+
+        # writing data to table
+        self.tableWidget.setHorizontalHeaderLabels(data[0].keys())
+        for i, item in enumerate(data):
+            for j, (key, value) in enumerate(item.items()):
+                self.tableWidget.setItem(i, j, QTableWidgetItem(value))
+
+        # set to read only
+        rows = len(data)
+        columns = len(data[0])
+        for i in range(rows):
+            for j in range(columns):
+                item = self.tableWidget.item(i, j)
+                item.setFlags(item.flags() & Qt.ItemIsEnabled)
+
+    def _addNewData(self):
+        # get data from inputs
+        data = {}
+        data["Name"] = self.inputName.text()
+        data["Login"] = self.inputLogin.text()
+        data["Password"] = self.inputPassword.text()
+        data["Url"] = self.inputUrl.text()
+        data["Note"] = self.inputNote.text()
+
+        # write data to db
+        handleUser.append_data(self.user, self.user_password, data)
+        self._showTable()
 
     def _generatePassword(self):
         random_password = handleUser.generate_random_password()
-        self.generatedPassword.setText(random_password)
+        self.inputPassword.setText(random_password)
+        clipboard = app.clipboard()
+        clipboard.setText(random_password)
+
+    def _writeEditData(self):
+        headers = ["Name", "Login", "Password", "Url", "Note"]
+        rows = self.tableWidget.rowCount()
+        columns = self.tableWidget.columnCount()
+        data = []
+        for i in range(0, rows):
+            temp = {}
+            for j in range(0, columns):
+                item = self.tableWidget.item(i, j)
+                temp[headers[j]] = item.text()
+            data.append(temp)
+
+        handleUser.delete_data(self.user)
+        handleUser.write_data(self.user, self.user_password, data)
+
+    def _deleteRow(self):
+        row = int(self.deleteInput.text()) - 1
+        print("ROW:", row)
+        self.tableWidget.removeRow(row)
+        self._writeEditData()
+
+    def _applyAction(self):
+        self._writeEditData()
+        self._switchTableLock()
+
+    def _cancelAction(self):
+        self._showTable()
+        self._switchTableLock()
+
+    def _switchTableEdit(self):
+        self.unlockEditBtn.setDisabled(True)
+        self.addRowBtn.setDisabled(True)
+        self.deleteBtn.setDisabled(True)
+        self.applyBtn.setDisabled(False)
+        self.cancelBtn.setDisabled(False)
+        # unlock
+        data = handleUser.read_data(self.user, self.user_password)
+        rows = len(data)
+        columns = len(data[0])
+        for i in range(rows):
+            for j in range(columns):
+                item = self.tableWidget.item(i, j)
+                item.setFlags(item.flags() | ~Qt.ItemIsEnabled)
 
     def _switchTableLock(self):
-        pass
+        self.unlockEditBtn.setDisabled(False)
+        self.addRowBtn.setDisabled(False)
+        self.deleteBtn.setDisabled(False)
+        self.applyBtn.setDisabled(True)
+        self.cancelBtn.setDisabled(True)
+
+        # lock
+        data = handleUser.read_data(self.user, self.user_password)
+        rows = len(data)
+        columns = len(data[0])
+        for i in range(rows):
+            for j in range(columns):
+                item = self.tableWidget.item(i, j)
+                item.setFlags(item.flags() & Qt.ItemIsEnabled)
 
 
 # user_info = []
