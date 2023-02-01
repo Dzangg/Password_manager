@@ -2,4 +2,8 @@
 
 Main Window
 
-![main_window](https://user-images.githubusercontent.com/79015072/215582547-7cb9162c-45d0-4b6d-a0d5-a12ad0f3aea7.png)
+![main_window](https://user-images.githubusercontent.com/79015072/216077870-f3b76b7e-c303-476a-a701-fa68fbe248ef.png)
+
+User Panel
+
+![user_panel](https://user-images.githubusercontent.com/79015072/216077864-641e7c2f-e0b3-4799-949e-7a1a5586f362.png)
