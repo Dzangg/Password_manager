@@ -401,7 +401,7 @@ class userPanelWidget(QWidget):
             self.close()
 
     def _createInputData(self):
-        self.inputNameLabel = QLabel("Name:")
+        self.inputNameLabel = QLabel("Page:")
         self.inputLoginLabel = QLabel("Login:")
         self.inputPasswordLabel = QLabel("Password:")
         self.inputUrlLabel = QLabel("Url:")
@@ -556,7 +556,7 @@ class userPanelWidget(QWidget):
 
     def _addNewData(self):
         data = {}
-        data["Name"] = self.inputName.text()
+        data["Page"] = self.inputName.text()
         data["Login"] = self.inputLogin.text()
         data["Password"] = self.inputPassword.text()
         data["Url"] = self.inputUrl.text()
@@ -573,7 +573,7 @@ class userPanelWidget(QWidget):
         clipboard.setText(random_password)
 
     def _writeEditData(self):
-        headers = ["Name", "Login", "Password", "Url", "Note"]
+        headers = ["Page", "Login", "Password", "Url", "Note"]
         rows = self.tableWidget.rowCount()
         columns = self.tableWidget.columnCount()
         data = []
@@ -637,6 +637,7 @@ if __name__ == "__main__":
     handleUser.initializeDirectory()
     app = QApplication(sys.argv)
     window = Window()
+    window.setWindowIcon(QIcon("icon.png"))
     window.show()
     p = popoutWidget()
     sys.exit(app.exec_())

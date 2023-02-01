@@ -1,0 +1,292 @@
+QLabel#mainLabel, QLabel#createProfileLabel {
+    color: #fc332f;
+    font-size: 30px;
+    font-family: Roboto;
+    margin-bottom: 50px;
+    text-align: justify;
+}
+/* */
+QPushButton#loginBtn {
+    background-color:#ffffff;
+    border-radius:8px;
+    border:2px solid #fc332f;
+    display:inline-block;
+    color:#fc332f;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+QPushButton#loginBtn:hover{
+    box-shadow: 0 0 20px rgba(104, 85, 224, 0.6);
+    background-color:#fc332f;
+    color: #ffffff;
+}
+QPushButton#loginBtn:active {
+    opacity: .5;
+    position:relative;
+    top:1px;
+}
+/* */
+QPushButton#signupBtn {
+    background-color:#fc332f;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color:#ffffff;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+QPushButton#signupBtn:hover {
+    color: #fff;
+    background-color: #e0332f;
+    box-shadow: 0 0 90px rgba(104, 85, 224);
+    transform: translateY(-2px);
+}
+QPushButton#signupBtn:active {
+    opacity: .5;
+    position:relative;
+    top:1px;
+}
+/* */
+QPushButton#okButton {
+    display:inline-block;
+    padding:0.7em 1.4em;
+    margin:0 0.3em 0.3em 0;
+    border-radius:4px;
+    box-sizing: border-box;
+    text-decoration:none;
+    font-family:'Roboto',sans-serif;
+    text-transform:uppercase;
+    font-weight:400;
+    color:#FFFFFF;
+    background-color: #fc332f;
+    box-shadow:inset 0 -0.6em 0 -0.35em rgba(0,0,0,0.17);
+    text-align:center;
+    position:relative;
+}
+QPushButton#okButton:hover {
+    text-shadow: 0 0 2em rgba(255,255,255,1);
+    color:#FFFFFF;
+    border-color:#FFFFFF;
+}
+
+QPushButton#cancelButton {
+    display:inline-block;
+    padding:0.7em 1.4em;
+    margin:0 0.3em 0.3em 0;
+    border-radius:4px;
+    box-sizing: border-box;
+    text-decoration:none;
+    font-family:'Roboto',sans-serif;
+    text-transform:uppercase;
+    font-weight:400;
+    color:#FFFFFF;
+    background-color: #8e918d;
+    box-shadow:inset 0 -0.6em 0 -0.35em rgba(0,0,0,0.17);
+    text-align:center;
+    position:relative;
+}
+QPushButton#cancelButton:hover {
+    text-shadow: 0 0 2em rgba(255,255,255,1);
+    color:#FFFFFF;
+    border-color:#FFFFFF;
+}
+
+QLabel#signedPopoutLabel {
+    font-size: 14px;
+}
+
+/* ---------------- User Panel ---------------- */
+
+QLineEdit#input {
+    border: 1px solid #3c3d3c;
+    border-radius: 2px;
+    text-align:left; 
+    padding:2px;
+    font-size:11px;
+    font-style:none; 
+    font-family:sans-serif;  
+}
+
+QLabel#label {
+    font-weight: 300;
+    font-size: 14px;
+    font-family:Verdana;
+}
+
+QLineEdit#inputName:focus { 
+    outline:none; 
+} 
+
+QLabel#userLabel {
+    font-size: 20px;
+    font-family:Verdana;
+}
+
+QLabel#userNameLabel {
+    font-weight: bold;
+    color: #fc332f;
+    font-size: 20px;
+    font-family:Verdana;
+}
+
+QPushButton#addRowBtn:enabled {
+    background-color:#fc332f;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color:#ffffff;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#addRowBtn:disabled {
+    background-color: #8e918d;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color: #3b3939;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#randomPasswordBtn {
+    background-color: #343634;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color:#ffffff;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#editBtn:enabled {
+    background-color: #fc332f;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color:#ffffff;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#editBtn:disabled {
+    background-color: #8e918d;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color: #3b3939;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#applyBtn:enabled {
+    background-color: #33801d;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color: #ffffff;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#applyBtn:disabled {
+    background-color: #8e918d;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color: #3b3939;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#cancelBtn:enabled {
+    background-color: #343634;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color: #ffffff;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#cancelBtn:disabled {
+    background-color: #8e918d;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color: #3b3939;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#deleteBtn:enabled {
+    background-color: #fc332f;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color:#ffffff;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#deleteBtn:disabled {
+    background-color: #8e918d;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color: #3b3939;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
+
+QPushButton#logoutBtn {
+    background-color: #fc332f;
+    border-radius:8px;
+    border:2px solid #ffffff;
+    display:inline-block;
+    color:#ffffff;
+    font-family:Verdana;
+    font-size:16px;
+    font-weight:bold;
+    padding:10px 10px;
+    text-decoration:none;
+}
