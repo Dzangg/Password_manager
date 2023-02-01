@@ -79,7 +79,6 @@ def decrypt_data(password, data, user):
 def encrypt_data(password, data, user):
     json_data = json.dumps(data, indent=4)
     json_data = json_data.encode()
-    print(json_data)
     second_key = create_secondKey(password)
     decrypted_first_key = read_firstKey(user, second_key)
     f = Fernet(decrypted_first_key)
@@ -91,8 +90,6 @@ def compare_passwords(user, given_password):
     hashed = read_hashed(user).encode()
     salt = read_salt(user)
     hashed_given = hash_password(given_password.encode(), salt.encode())
-    print("given ", hashed_given)
-    print("hashed ", hashed)
     if hashed_given == hashed:
         return True
     return False
@@ -151,7 +148,6 @@ def initializeDirectory():
 def write_firstKey(user, encrypted_first_key):
     data = {"Key": encrypted_first_key.decode()}
     json_data = json.dumps(data, indent=4)
-
     with open(usersDir + user + "/file_key.key", "w") as f:
         f.write(json_data)
 
@@ -162,7 +158,6 @@ def read_firstKey(user, second_key):
     jsonContent = fileObject.read()
     encrypted_firstkey = json.loads(jsonContent)
     encrypted_firstkey = encrypted_firstkey["Key"]
-
     decrypted_firstkey = decrypt_firstKey(encrypted_firstkey, second_key)
     return decrypted_firstkey
 

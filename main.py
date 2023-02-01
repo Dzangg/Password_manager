@@ -151,7 +151,11 @@ class signUpWidget(QWidget):
         self.labelName = QLabel("Name:")
         self.labelPassword = QLabel("Password:")
         self.name = QLineEdit()
+        self.name.setObjectName("input")
+        self.name.setStyleSheet(css)
         self.password = QLineEdit()
+        self.password.setObjectName("input")
+        self.password.setStyleSheet(css)
         self.name.setFixedSize(200, 20)
         self.password.setFixedSize(200, 20)
         self.password.setEchoMode(QLineEdit.Password)
@@ -199,19 +203,14 @@ class signUpWidget(QWidget):
                 self.errorUserExists(user)
                 return False
 
-    def _initializeProfileCreation(self, user):
+    def _initializeProfile(self, user):
         password = self.password.text()
         try:
             key_one = handleUser.create_firstKey()
-            # print(key_one)
             key_two = handleUser.create_secondKey(password)
-            # print(key_two)
             encrypted_first_key = handleUser.encrypt_firstKey(key_one, key_two)
-            # print(encrypted_first_key)
             salt = handleUser.generateRandomSalt()
-            # print(salt)
             hashed_password = handleUser.hash_password(password.encode(), salt)
-            # print(hashed_password)
             handleUser.write_firstKey(user, encrypted_first_key)
             handleUser.write_info(user, hashed_password, salt)
             self.parent.signed()
@@ -222,7 +221,7 @@ class signUpWidget(QWidget):
     def _submitForm(self):
         user = self.name.text()
         if self.isValid(user):
-            self._initializeProfileCreation(user)
+            self._initializeProfile(user)
 
 
 class logInWidget(QWidget):
@@ -259,7 +258,6 @@ class logInWidget(QWidget):
         # add layouts to outer layout
         outerLayout.addLayout(topLayout)
         outerLayout.addLayout(formLayout)
-        # outerLayout.addSpacing(100)
         outerLayout.addLayout(bottomLayout)
         self.setLayout(outerLayout)
 
@@ -269,7 +267,11 @@ class logInWidget(QWidget):
         self.labelName = QLabel("Name:")
         self.labelPassword = QLabel("Password:")
         self.name = QLineEdit()
+        self.name.setObjectName("input")
+        self.name.setStyleSheet(css)
         self.password = QLineEdit()
+        self.password.setObjectName("input")
+        self.password.setStyleSheet(css)
         self.name.setFixedSize(200, 20)
         self.password.setFixedSize(200, 20)
         self.password.setEchoMode(QLineEdit.Password)
@@ -351,10 +353,9 @@ class userPanelWidget(QWidget):
         self.btnLayout = QHBoxLayout()
         self.tableLayout = QVBoxLayout()
         self.toolsLayout = QHBoxLayout()
-        self.deleteLayout = QGridLayout()
+        self.logoutLayout = QHBoxLayout()
 
         self.tableWidget = QTableWidget()
-        # self.tableWidget.setMaximumSize(560, 300)
 
         self.outerlayout.setAlignment(Qt.AlignCenter)
         self.headerLayout.setAlignment(Qt.AlignLeft)
@@ -362,8 +363,7 @@ class userPanelWidget(QWidget):
         self.inputLayout.setAlignment(Qt.AlignLeft)
         self.btnLayout.setAlignment(Qt.AlignLeft)
         self.tableLayout.setAlignment(Qt.AlignLeft)
-        self.toolsLayout.setAlignment(Qt.AlignLeft)
-        self.deleteLayout.setAlignment(Qt.AlignLeft)
+        self.logoutLayout.setAlignment(Qt.AlignRight)
 
         self.userLabel = QLabel("User: ")
         self.userLabel.setObjectName("userLabel")
@@ -387,7 +387,8 @@ class userPanelWidget(QWidget):
         self.tableLayout.addWidget(self.tableWidget)
         self.outerlayout.addLayout(self.tableLayout)
         self.outerlayout.addLayout(self.toolsLayout)
-        self.outerlayout.addLayout(self.deleteLayout)
+        self.toolsLayout.addLayout(self.logoutLayout)
+
         self.setLayout(self.outerlayout)
 
     def _doubleCheck(self, user, password):
@@ -407,12 +408,26 @@ class userPanelWidget(QWidget):
         self.inputNoteLabel = QLabel("Note:")
         self.addRowBtn = QPushButton("Add")
 
+        self.inputNameLabel.setObjectName("label")
+        self.inputNameLabel.setStyleSheet(css)
+        self.inputLoginLabel.setObjectName("label")
+        self.inputLoginLabel.setStyleSheet(css)
+        self.inputPasswordLabel.setObjectName("label")
+        self.inputPasswordLabel.setStyleSheet(css)
+        self.inputUrlLabel.setObjectName("label")
+        self.inputUrlLabel.setStyleSheet(css)
+        self.inputNoteLabel.setObjectName("label")
+        self.inputNoteLabel.setStyleSheet(css)
+        self.addRowBtn.setObjectName("addRowBtn")
+        self.addRowBtn.setStyleSheet(css)
+
+        self.addRowBtn.setCursor(QCursor(Qt.PointingHandCursor))
+
         self.inputNameLabel.setFixedSize(130, 20)
         self.inputLoginLabel.setFixedSize(130, 20)
         self.inputPasswordLabel.setFixedSize(130, 20)
         self.inputUrlLabel.setFixedSize(130, 20)
         self.inputNoteLabel.setFixedSize(130, 20)
-        self.addRowBtn.setFixedSize(130, 20)
 
         self.inputName = QLineEdit()
         self.inputLogin = QLineEdit()
@@ -420,11 +435,23 @@ class userPanelWidget(QWidget):
         self.inputUrl = QLineEdit()
         self.inputNote = QLineEdit()
 
+        self.inputName.setObjectName("input")
+        self.inputName.setStyleSheet(css)
+        self.inputLogin.setObjectName("input")
+        self.inputLogin.setStyleSheet(css)
+        self.inputPassword.setObjectName("input")
+        self.inputPassword.setStyleSheet(css)
+        self.inputUrl.setObjectName("input")
+        self.inputUrl.setStyleSheet(css)
+        self.inputNote.setObjectName("input")
+        self.inputNote.setStyleSheet(css)
+
         self.inputName.setFixedSize(130, 20)
         self.inputLogin.setFixedSize(130, 20)
         self.inputPassword.setFixedSize(130, 20)
         self.inputUrl.setFixedSize(130, 20)
         self.inputNote.setFixedSize(130, 20)
+        self.addRowBtn.setFixedSize(60, 40)
 
         self.addRowBtn.clicked.connect(self._addNewData)
 
@@ -433,6 +460,7 @@ class userPanelWidget(QWidget):
         self.labelLayout.addWidget(self.inputPasswordLabel)
         self.labelLayout.addWidget(self.inputUrlLabel)
         self.labelLayout.addWidget(self.inputNoteLabel)
+
         self.btnLayout.addWidget(self.addRowBtn)
 
         self.inputLayout.addWidget(self.inputName)
@@ -442,24 +470,44 @@ class userPanelWidget(QWidget):
         self.inputLayout.addWidget(self.inputNote)
 
     def _createTools(self):
-        self.unlockEditBtn = QPushButton("Edit")
-        self.unlockEditBtn.clicked.connect(self._switchTableEdit)
+        self.editBtn = QPushButton("Edit")
+        self.editBtn.clicked.connect(self._switchTableEdit)
         self.applyBtn = QPushButton("Apply")
         self.cancelBtn = QPushButton("Cancel")
         self.randomPasswordBtn = QPushButton("Generate password")
         self.randomPasswordBtn.clicked.connect(self._generatePassword)
-        self.deleteBtn = QPushButton("Delete row:")
-        self.deleteBtn.clicked.connect(self._deleteRow)
-        self.deleteInput = QLineEdit()
-        self.deleteInput.setPlaceholderText("Row")
+        self.deleteBtn = QPushButton("Delete row")
+        self.deleteBtn.setDisabled(True)
+        self.deleteBtn.clicked.connect(self._deleteSelectedRow)
+        self.logoutBtn = QPushButton("Exit")
+        self.logoutBtn.clicked.connect(lambda: exit())
+        self.logoutBtn.setObjectName("logoutBtn")
+        self.logoutBtn.setStyleSheet(css)
 
-        self.randomPasswordBtn.setFixedSize(130, 20)
+        self.randomPasswordBtn.setObjectName("randomPasswordBtn")
+        self.randomPasswordBtn.setStyleSheet(css)
+        self.editBtn.setObjectName("editBtn")
+        self.editBtn.setStyleSheet(css)
+        self.applyBtn.setObjectName("applyBtn")
+        self.applyBtn.setStyleSheet(css)
+        self.cancelBtn.setObjectName("cancelBtn")
+        self.cancelBtn.setStyleSheet(css)
+        self.deleteBtn.setObjectName("deleteBtn")
+        self.deleteBtn.setStyleSheet(css)
 
-        self.unlockEditBtn.setFixedSize(130, 20)
-        self.applyBtn.setFixedSize(130, 20)
-        self.cancelBtn.setFixedSize(130, 20)
-        self.deleteBtn.setFixedSize(130, 20)
-        self.deleteInput.setFixedSize(130, 20)
+        self.randomPasswordBtn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.applyBtn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.cancelBtn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.deleteBtn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.editBtn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.logoutBtn.setCursor(QCursor(Qt.PointingHandCursor))
+
+        self.randomPasswordBtn.setFixedSize(200, 40)
+        self.editBtn.setFixedSize(60, 40)
+        self.applyBtn.setFixedSize(130, 40)
+        self.cancelBtn.setFixedSize(130, 40)
+        self.deleteBtn.setFixedSize(130, 40)
+        self.logoutBtn.setFixedSize(100, 40)
 
         self.applyBtn.setDisabled(True)
         self.cancelBtn.setDisabled(True)
@@ -467,14 +515,13 @@ class userPanelWidget(QWidget):
         self.applyBtn.clicked.connect(self._applyAction)
         self.cancelBtn.clicked.connect(self._cancelAction)
 
+        self.btnLayout.addWidget(self.deleteBtn)
         self.btnLayout.addWidget(self.randomPasswordBtn)
 
-        self.toolsLayout.addWidget(self.unlockEditBtn)
+        self.toolsLayout.addWidget(self.editBtn)
         self.toolsLayout.addWidget(self.applyBtn)
         self.toolsLayout.addWidget(self.cancelBtn)
-
-        self.deleteLayout.addWidget(self.deleteBtn, 0, 0)
-        self.deleteLayout.addWidget(self.deleteInput, 0, 1)
+        self.logoutLayout.addWidget(self.logoutBtn)
 
     def _showTable(self):
         # get data from file
@@ -501,9 +548,13 @@ class userPanelWidget(QWidget):
             for j in range(columns):
                 item = self.tableWidget.item(i, j)
                 item.setFlags(item.flags() & Qt.ItemIsEnabled)
+        self.tableWidget.setColumnWidth(0, 130)
+        self.tableWidget.setColumnWidth(1, 130)
+        self.tableWidget.setColumnWidth(2, 130)
+        self.tableWidget.setColumnWidth(3, 130)
+        self.tableWidget.setColumnWidth(4, 137)
 
     def _addNewData(self):
-        # get data from inputs
         data = {}
         data["Name"] = self.inputName.text()
         data["Login"] = self.inputLogin.text()
@@ -536,11 +587,11 @@ class userPanelWidget(QWidget):
         handleUser.delete_data(self.user)
         handleUser.write_data(self.user, self.user_password, data)
 
-    def _deleteRow(self):
-        row = int(self.deleteInput.text()) - 1
-        print("ROW:", row)
-        self.tableWidget.removeRow(row)
-        self._writeEditData()
+    def _deleteSelectedRow(self):
+        selected = self.tableWidget.selectedItems()
+        if selected:
+            row = selected[0].row()
+            self.tableWidget.removeRow(row)
 
     def _applyAction(self):
         self._writeEditData()
@@ -551,9 +602,9 @@ class userPanelWidget(QWidget):
         self._switchTableLock()
 
     def _switchTableEdit(self):
-        self.unlockEditBtn.setDisabled(True)
+        self.editBtn.setDisabled(True)
         self.addRowBtn.setDisabled(True)
-        self.deleteBtn.setDisabled(True)
+        self.deleteBtn.setDisabled(False)
         self.applyBtn.setDisabled(False)
         self.cancelBtn.setDisabled(False)
         # unlock
@@ -566,9 +617,9 @@ class userPanelWidget(QWidget):
                 item.setFlags(item.flags() | ~Qt.ItemIsEnabled)
 
     def _switchTableLock(self):
-        self.unlockEditBtn.setDisabled(False)
+        self.editBtn.setDisabled(False)
         self.addRowBtn.setDisabled(False)
-        self.deleteBtn.setDisabled(False)
+        self.deleteBtn.setDisabled(True)
         self.applyBtn.setDisabled(True)
         self.cancelBtn.setDisabled(True)
 
@@ -582,22 +633,6 @@ class userPanelWidget(QWidget):
                 item.setFlags(item.flags() & Qt.ItemIsEnabled)
 
 
-# user_info = []
-# # add rows
-# user_info.append({"Name:": "dzang", "Password": 123})
-# p = "123"
-# encrypted = handleUser.encrypt_data(p, user_info)
-# print(encrypted)
-# decrypted = handleUser.decrypt_data(p, encrypted)
-# print(decrypted)
-#
-# salt = b'$2b$12$./wcHVff.h/qJd1sxo9dau'
-# print("salt", salt)
-# p = b'OSDkoasd8721nzc#$asdlqwpo'
-# p = handleUser.hash_password(p, salt)
-# handleUser.write_info("dzang", p, salt)
-# p = b'OSDkoasd8721nzc#$asdlqwpo'
-# handleUser.compare_passwords("dzang", p)
 if __name__ == "__main__":
     handleUser.initializeDirectory()
     app = QApplication(sys.argv)
