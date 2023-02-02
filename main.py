@@ -24,10 +24,10 @@ class Window(QMainWindow):
 
         # central widget
         self.centralwidget = QStackedWidget()
-
         self.setCentralWidget(self.centralwidget)
         self.main_window = QWidget(self)
         self.main_window.setWindowFlags(Qt.FramelessWindowHint)
+
         # Creating Layouts
         outerLayout = QVBoxLayout()
         topLayout = QVBoxLayout()
@@ -54,12 +54,15 @@ class Window(QMainWindow):
         self.main_window.setLayout(outerLayout)
         self.centralwidget.addWidget(self.main_window)
 
+    # on user log in
     def connect_user(self, user, password):
         panel = userPanelWidget(user, password)
         self.centralwidget.addWidget(panel)
         self.centralwidget.setCurrentWidget(panel)
         self.setMinimumSize(0, 0)
+        self.setMaximumSize(640, 480)
 
+    # on user created
     def signed(self):
         popout()
         self.centralwidget.setCurrentWidget(self.main_window)
@@ -70,22 +73,26 @@ class Window(QMainWindow):
         self.centralwidget.setCurrentWidget(self.main_window)
         self.centralwidget.removeWidget(self.signup_widget)
 
+    # switch between widgets
     def back_login(self):
         self.centralwidget.setCurrentWidget(self.main_window)
         self.centralwidget.removeWidget(self.login_widget)
 
+    # change layout to signup layout
     def signupView(self):
         self.signup_widget = signUpWidget(self)
         self.signup_widget.cancelBtn.clicked.connect(self.back_sign)
         self.centralwidget.addWidget(self.signup_widget)
         self.centralwidget.setCurrentWidget(self.signup_widget)
 
+    # change layout to login layout
     def loginView(self):
         self.login_widget = logInWidget(self)
         self.login_widget.cancelBtn.clicked.connect(self.back_login)
         self.centralwidget.addWidget(self.login_widget)
         self.centralwidget.setCurrentWidget(self.login_widget)
 
+    # create Main label
     def _createLabel(self):
         self.label = QLabel("Password Manager")
         self.label.setObjectName("mainLabel")
@@ -93,6 +100,7 @@ class Window(QMainWindow):
         self.label.setFixedSize(300, 200)
         self.label.setStyleSheet(css)
 
+    # create buttons
     def _createButtons(self):
         self.loginBtn = QPushButton("Log In")
         self.loginBtn.setObjectName("loginBtn")
@@ -113,6 +121,7 @@ class signUpWidget(QWidget):
         super(signUpWidget, self).__init__(parent)
         self.parent = parent
         self.setMinimumSize(WIN_SIZE, WIN_SIZE)
+
         # create layouts
         outerLayout = QVBoxLayout()
         topLayout = QVBoxLayout()
@@ -141,30 +150,30 @@ class signUpWidget(QWidget):
         # add layouts to outer layout
         outerLayout.addLayout(topLayout)
         outerLayout.addLayout(formLayout)
-        # outerLayout.addSpacing(100)
         outerLayout.addLayout(bottomLayout)
         self.setLayout(outerLayout)
 
+    # signup form creation
     def _signupForm(self):
         self.errorLabel = QLabel("")
         self.infoLabel = QLabel("Create Profile")
         self.labelName = QLabel("Name:")
         self.labelPassword = QLabel("Password:")
         self.name = QLineEdit()
+        self.password = QLineEdit()
+
         self.name.setObjectName("input")
         self.name.setStyleSheet(css)
-        self.password = QLineEdit()
         self.password.setObjectName("input")
         self.password.setStyleSheet(css)
-        self.name.setFixedSize(200, 20)
-        self.password.setFixedSize(200, 20)
-        self.password.setEchoMode(QLineEdit.Password)
-
         self.name.textChanged.connect(self.handleInputsChange)
+        self.password.setEchoMode(QLineEdit.Password)
 
         self.acceptBtn = QPushButton("Ok")
         self.cancelBtn = QPushButton("Cancel")
 
+        self.name.setFixedSize(200, 20)
+        self.password.setFixedSize(200, 20)
         self.acceptBtn.setFixedSize(100, 40)
         self.cancelBtn.setFixedSize(100, 40)
 
@@ -181,16 +190,20 @@ class signUpWidget(QWidget):
 
         self.acceptBtn.clicked.connect(self._submitForm)
 
+    # switch error warning label text
     def handleInputsChange(self):
         if self.errorLabel.text() != "":
             self.errorLabel.setText("")
 
+    # user exists error
     def errorUserExists(self, value):
         self.errorLabel.setText("User {} already exists!".format(value))
 
+    # invalid credentials error
     def invalidCredentials(self):
         self.errorLabel.setText("Invalid credentials")
 
+    # is user signup valid
     def isValid(self, user):
         if self.name.text() == "" or self.password.text() == "":
             self.invalidCredentials()
@@ -203,6 +216,7 @@ class signUpWidget(QWidget):
                 self.errorUserExists(user)
                 return False
 
+    # user profile creation
     def _initializeProfile(self, user):
         password = self.password.text()
         try:
@@ -218,6 +232,7 @@ class signUpWidget(QWidget):
             handleUser.del_user(user)
             print("Signup error occured")
 
+    # submit form
     def _submitForm(self):
         user = self.name.text()
         if self.isValid(user):
@@ -261,6 +276,7 @@ class logInWidget(QWidget):
         outerLayout.addLayout(bottomLayout)
         self.setLayout(outerLayout)
 
+    # login form creation
     def _logInForm(self):
         self.errorLabel = QLabel("")
         self.infoLabel = QLabel("Log In")
@@ -297,24 +313,26 @@ class logInWidget(QWidget):
 
         self.acceptBtn.clicked.connect(self._submitForm)
 
+    # error label
     def createErrorLabel(self):
         self.errorLabel.setText("Invalid credentials!")
 
+    # switch warning text
     def handleInputsChange(self):
         if self.errorLabel.text() != "":
             self.errorLabel.setText("")
 
+    # validation
     def isValid(self):
         if self.name.text() == "" or self.password.text() == "":
             return False
         return True
 
+    # invalid credentials error
     def invalidCredentials(self):
         self.errorLabel.setText("Invalid credentials")
 
-    def _initializeLogin(self):
-        pass
-
+    # submit form
     def _submitForm(self):
         user = self.name.text()
         if self.isValid():
@@ -330,6 +348,7 @@ class logInWidget(QWidget):
             self.invalidCredentials()
 
 
+# signup popout widget
 class popoutWidget(QDialog):
     def __init__(self):
         super(popoutWidget, self).__init__()
@@ -346,6 +365,7 @@ class popoutWidget(QDialog):
 class userPanelWidget(QWidget):
     def __init__(self, user, password):
         super(userPanelWidget, self).__init__()
+        # layouts creation
         self.outerlayout = QVBoxLayout()
         self.headerLayout = QHBoxLayout()
         self.labelLayout = QHBoxLayout()
@@ -355,8 +375,10 @@ class userPanelWidget(QWidget):
         self.toolsLayout = QHBoxLayout()
         self.logoutLayout = QHBoxLayout()
 
+        # table creation
         self.tableWidget = QTableWidget()
 
+        # layouts alignments
         self.outerlayout.setAlignment(Qt.AlignCenter)
         self.headerLayout.setAlignment(Qt.AlignLeft)
         self.labelLayout.setAlignment(Qt.AlignLeft)
@@ -372,14 +394,19 @@ class userPanelWidget(QWidget):
         self.userNameLabel.setObjectName("userNameLabel")
         self.userNameLabel.setStyleSheet(css)
 
-        self._doubleCheck(user, password)
-        self._showTable()
-        self._createInputData()
-        self._createTools()
-
         self.headerLayout.addWidget(self.userLabel)
         self.headerLayout.addWidget(self.userNameLabel)
 
+        # double verify user
+        self._doubleCheck(user, password)
+        # show user data in table
+        self._showTable()
+        # create input labels and buttons
+        self._createInputData()
+        # create tools inputs etc
+        self._createTools()
+
+        # add layouts to outer layout
         self.outerlayout.addLayout(self.headerLayout)
         self.outerlayout.addLayout(self.labelLayout)
         self.outerlayout.addLayout(self.inputLayout)
@@ -391,6 +418,7 @@ class userPanelWidget(QWidget):
 
         self.setLayout(self.outerlayout)
 
+    # double validation
     def _doubleCheck(self, user, password):
         isValid = handleUser.compare_passwords(user, password)
         if isValid:
@@ -400,7 +428,9 @@ class userPanelWidget(QWidget):
         else:
             self.close()
 
+    # create labels and buttons
     def _createInputData(self):
+
         self.inputNameLabel = QLabel("Page:")
         self.inputLoginLabel = QLabel("Login:")
         self.inputPasswordLabel = QLabel("Password:")
@@ -469,6 +499,7 @@ class userPanelWidget(QWidget):
         self.inputLayout.addWidget(self.inputUrl)
         self.inputLayout.addWidget(self.inputNote)
 
+    # create tools buttons etc
     def _createTools(self):
         self.editBtn = QPushButton("Edit")
         self.editBtn.clicked.connect(self._switchTableEdit)
@@ -523,6 +554,7 @@ class userPanelWidget(QWidget):
         self.toolsLayout.addWidget(self.cancelBtn)
         self.logoutLayout.addWidget(self.logoutBtn)
 
+    # show user data on table
     def _showTable(self):
         # get data from file
         data = handleUser.read_data(self.user, self.user_password)
@@ -554,6 +586,7 @@ class userPanelWidget(QWidget):
         self.tableWidget.setColumnWidth(3, 130)
         self.tableWidget.setColumnWidth(4, 137)
 
+    # add row
     def _addNewData(self):
         data = {}
         data["Page"] = self.inputName.text()
@@ -566,12 +599,14 @@ class userPanelWidget(QWidget):
         handleUser.append_data(self.user, self.user_password, data)
         self._showTable()
 
+    # generate random password
     def _generatePassword(self):
         random_password = handleUser.generate_random_password()
         self.inputPassword.setText(random_password)
         clipboard = app.clipboard()
         clipboard.setText(random_password)
 
+    # write edited data
     def _writeEditData(self):
         headers = ["Page", "Login", "Password", "Url", "Note"]
         rows = self.tableWidget.rowCount()
@@ -587,20 +622,24 @@ class userPanelWidget(QWidget):
         handleUser.delete_data(self.user)
         handleUser.write_data(self.user, self.user_password, data)
 
+    # on selected row deletion
     def _deleteSelectedRow(self):
         selected = self.tableWidget.selectedItems()
         if selected:
             row = selected[0].row()
             self.tableWidget.removeRow(row)
 
+    # apply action
     def _applyAction(self):
         self._writeEditData()
         self._switchTableLock()
 
+    # cancel action
     def _cancelAction(self):
         self._showTable()
         self._switchTableLock()
 
+    # switch table edit style
     def _switchTableEdit(self):
         self.editBtn.setDisabled(True)
         self.addRowBtn.setDisabled(True)
@@ -616,6 +655,7 @@ class userPanelWidget(QWidget):
                 item = self.tableWidget.item(i, j)
                 item.setFlags(item.flags() | ~Qt.ItemIsEnabled)
 
+    # switch table lock
     def _switchTableLock(self):
         self.editBtn.setDisabled(False)
         self.addRowBtn.setDisabled(False)
