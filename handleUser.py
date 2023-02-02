@@ -18,6 +18,16 @@ import shutil
 current_dir = os.getcwd()
 usersDir = current_dir + "/users/"
 
+'''
+
+    It is main functional module 
+    
+    It contains functions for encrypting, decrypting, hashing and basic operations with files, \
+    
+    that are essential for working with user data.
+    
+'''
+
 
 # ------------------- Cryptography & Hash Section -------------------
 
