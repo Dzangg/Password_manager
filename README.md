@@ -22,7 +22,7 @@ Password Manager is a password management application built using the PyQt5 fram
 
 ## Installation
 
-To install and run `passwordManager-pyqt5`, follow these steps:
+To install and run `Password_manager`, follow these steps:
 
 1. **Clone the Repository**:
    ```bash
