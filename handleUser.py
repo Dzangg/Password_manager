@@ -7,7 +7,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 import os
-import secrets
 import json
 
 import random
@@ -18,7 +17,7 @@ import shutil
 current_dir = os.getcwd()
 usersDir = current_dir + "/users/"
 
-'''
+"""
 
     It is main functional module 
     
@@ -26,10 +25,11 @@ usersDir = current_dir + "/users/"
     
     that are essential for working with user data.
     
-'''
+"""
 
 
 # ------------------- Cryptography & Hash Section -------------------
+
 
 # generate random salt
 def generateRandomSalt():
@@ -58,7 +58,7 @@ def create_secondKey(passwd):
         length=32,
         salt=passwd,
         iterations=100000,
-        backend=default_backend()
+        backend=default_backend(),
     )
     key = base64.urlsafe_b64encode(kdf.derive(passwd))
 
@@ -150,7 +150,9 @@ def createUserFiles(user):
 
 # create app directory
 def initializeDirectory():
-    if not os.path.isdir(current_dir + "/users") and not os.path.isfile(current_dir + "/users"):
+    if not os.path.isdir(current_dir + "/users") and not os.path.isfile(
+        current_dir + "/users"
+    ):
         createUsers()
 
 
@@ -197,14 +199,14 @@ def append_data(user, password, row):
         temp = []
         temp.append(row)
         encrypted = encrypt_data(password, temp, user).decode()
-        with open(local_dir, 'w') as f:
+        with open(local_dir, "w") as f:
             f.write(encrypted)
 
 
 def write_data(user, password, data):
     local_dir = usersDir + user + "/user_data.json"
     encrypted = encrypt_data(password, data, user).decode()
-    with open(local_dir, 'w') as f:
+    with open(local_dir, "w") as f:
         f.write(encrypted)
 
 
@@ -221,7 +223,7 @@ def write_info(user, hashed, generatedSalt):
     data = {"salt": generatedSalt, "password": hashed}
     json_data = json.dumps(data, indent=4)
 
-    with open(local_dir, 'w') as f:
+    with open(local_dir, "w") as f:
         f.write(json_data)
 
 

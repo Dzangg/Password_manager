@@ -158,7 +158,7 @@ if __name__ == "__main__":
     handleUser.initializeDirectory()
     app = QApplication(sys.argv)
     window = Window()
-    window.setWindowIcon(QIcon("icon.png"))
+    window.setWindowIcon(QIcon("resources/icon.png"))
     window.show()
     p = popoutWidget.popoutWidget()
     sys.exit(app.exec_())
